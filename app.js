@@ -18,19 +18,31 @@ const tessdataPath = path.join(__dirname, "tessdata");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+let i=1;
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./tiff");
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    
+    let code = req.params.branchCode || "default"; // Ensure code is provided
+    let name = i.toString().padStart(5, "0"); // Format number to 5 digits
+    let finalFilename = `${code}_${name}.tif`;
+    console.log(req.body);
+    
+    console.log("Saved as:", finalFilename);
+    
+    i++; // Increment counter for next upload
+    cb(null, finalFilename);
   },
 });
 
 const upload = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
+    
     const filetype = file.originalname.split(".").pop();
     if (filetype !== "jpg") {
     }
@@ -38,8 +50,9 @@ const upload = multer({
   },
 });
 
-app.post("/upload", upload.single("file"), (req, res) => {
-  res.json({ file: req.file });
+app.post("/upload/:branchCode", upload.array("files"), (req, res) => {
+  const files = req.files.map((file) => file.filename);
+  res.json({ file: files });
 });
 
 app.post("/ocrData", async (req, res) => {
