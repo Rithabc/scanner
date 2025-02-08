@@ -3,6 +3,18 @@ import { useState,useEffect } from 'react';
 import { imageFORMULAScanJS } from "../api/scan.jsx";
 
 
+function codeIsValid(code){
+    if(code.length != 3){
+        return false;
+    }
+    for(let i = 0; i<code.length;i++){
+      if(code[i] < '0' || code[i] > '9'){
+        return false;
+    }
+  }
+  return true;
+}
+
 
 
 export default function Scanner() {
@@ -19,134 +31,57 @@ export default function Scanner() {
         setImage(imageFORMULAScanJS());
     },[])
 
-    const[settings,setSettings] = useState(
-        {
-            colormode: 4,
-            scanside: 1,
-            limit_number_of_sheets: 100,
-            resolution: 300,
-            pagesize: "AUTO",
-            fileformat: 0,
-            double_feed_detection: 1,
-            document_orientation: -1,
-            blank_page_detection_threshold: 10,
-            edge_emphasis: 0,
-            manual_feed_from_flatbed: 0,
-            carrier_sheet: 0,
-            schmprefix: "",
-            schmseparator: 0,
-            schmdatetime: -2,
-            show_error_message: 1,
-            destination: `http://localhost:5000/upload/${branchCode}`,
-            destinationheaders: {
-              Method: "POST",
-            },
-            destinationparameters: [],
-            destinationfileparameter: {
-              contenttype: "application/octet-stream",
-              contentdisposition: 'form-data; name="file"; filename="SCANNED_FILENAME"',
-            },
-            pdf_pages_per_file: 0,
-            pdf_ocr: 1,
-            pdf_ocr_language: "eng",
-            zone_ocr_settings: [
-              {
-                name: "micr",
-                language: "eng",
-                // "font":"E13B",
-                page: 1,
-                // "start_x": 6.43667,
-                start_y: 900,
-                // "end_x": 7.37334,
-                // "end_y": ,
-                unit: "pixel",
-              }
-            ],
-        }
-    )
-
-    useEffect(()=>{
-        setSettings(
-            {
-                colormode: 4,
-                scanside: 1,
-                limit_number_of_sheets: 100,
-                resolution: 300,
-                pagesize: "AUTO",
-                fileformat: 0,
-                double_feed_detection: 1,
-                document_orientation: -1,
-                blank_page_detection_threshold: 10,
-                edge_emphasis: 0,
-                manual_feed_from_flatbed: 0,
-                carrier_sheet: 0,
-                schmprefix: "",
-                schmseparator: 0,
-                schmdatetime: -2,
-                show_error_message: 1,
-                destination: `http://localhost:5000/upload/${branchCode}`,
-                destinationheaders: {
-                  Method: "POST",
-                },
-                destinationparameters: [],
-                destinationfileparameter: {
-                  contenttype: "application/octet-stream",
-                  contentdisposition: 'form-data; name="file"; filename="SCANNED_FILENAME"',
-                },
-                pdf_pages_per_file: 0,
-                pdf_ocr: 1,
-                pdf_ocr_language: "eng",
-                zone_ocr_settings: [
-                  {
-                    name: "micr",
-                    language: "eng",
-                    // "font":"E13B",
-                    page: 1,
-                    // "start_x": 6.43667,
-                    start_y: 900,
-                    // "end_x": 7.37334,
-                    // "end_y": ,
-                    unit: "pixel",
-                  }
-                ],
-            }
-        )
-    },[branchCode])
 
 
 
-    const startScan =async ()=>{
+
+
+    const startScan =async (code)=>{
+      const settings = {
+        colormode: 4,
+    scanside: 1,
+    limit_number_of_sheets: 100,
+    resolution: 200,
+    pagesize: "AUTO",
+    fileformat: 3,
+    double_feed_detection: 1,
+    document_orientation: -1,
+    blank_page_detection_threshold: 10,
+    edge_emphasis: 0,
+    manual_feed_from_flatbed: 0,
+    carrier_sheet: 0,
+    schmprefix: "",
+    schmseparator: 0,
+    schmdatetime: -2,
+    show_error_message: 1,
+    destination: `http://localhost:5000/upload/${code}`,
+    destinationheaders: {
+      Method: "POST",
+    },
+    destinationparameters: [],
+    destinationfileparameter: {
+      contenttype: "application/octet-stream",
+      contentdisposition: 'form-data; name="file"; filename="SCANNED_FILENAME"',
+    },
+    pdf_pages_per_file: 0,
+    pdf_ocr: 1,
+    pdf_ocr_language: "eng",
+}
         try {
             const FQDN = image.DEFAULT.FQDN;
             const scanResponse = await image.scanSetParameter(settings, FQDN);
+            // const data = await scanResponse.json();
+            console.log(scanResponse);
             setResponse(JSON.stringify(scanResponse, null, 2));
             setFileNames(scanResponse.value.files);
-            const result = await fetch(
-              `http://localhost:5000/ocrData`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ filenames: scanResponse.value.files }),
-              }
-            );
-            const data = await result.json();
-            setText(data.result);
-            const jpg = await fetch(
-              `http://localhost:5000/toJpg`
-            ,{
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body:JSON.stringify({filenames: scanResponse.value.files}),
-            });
-          } catch (error) {
-            setResponse(JSON.stringify(error, null, 2));
-            console.error(error);
-          }
+            console.log(fileNames);
     }
+    
+    catch (error) {
+        setResponse(JSON.stringify(error, null, 2));
+        console.error(error);
+    }
+  }
 
     
 
@@ -155,11 +90,19 @@ export default function Scanner() {
   return (
     <div className='bg-blue-100 w-screen h-screen flex justify-center items-center'>
       <div className='w-[80%] h-[60%] bg-gray-300 flex justify-center items-center rounded-lg gap-2 pt-2 px-2'>
-        <div className='bg-red-200 h-[90%] w-[60%]'></div>
+        <div className='bg-red-200 h-[90%] w-[60%]'>
+            <div className='w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll'>
+            {
+              fileNames?.map((cheque,index)=>(
+                <img src={`http://localhost:5000/tiff/${branchCode}_${cheque.filename}`} alt="cheque" className='w-[80%] h-[40%]' key={index}/>               
+              )
+            )}
+            </div>
+        </div>
         <div className='bg-red-200 h-[90%] w-[25%] overflow-y-scroll  '>
-            {cheques.map((cheque,index)=>(
+            {fileNames?.map((cheque,index)=>(
                 <div key={index} className='bg-green-100 w-[100%] h-[10%] flex justify-between items-center p-2 gap-2'>
-                    <h1 className='text-1xl font-bold'>{cheque}</h1>
+                    <h1 className='text-1xl font-bold'>{branchCode}_{cheque.filename}</h1>
                     
                 </div>
             ))}
@@ -172,7 +115,7 @@ export default function Scanner() {
                     <button className='btn  w-[7.5vw]'>End Batch</button>
                 </div>
                 <div className='flex gap-2 justify-center items-center'>
-                    <button className='btn w-[7.5vw]' onClick={startScan}>Scan</button>
+                    <button className={`btn w-[7.5vw] ${codeIsValid(branchCode)?"":'btn-disabled'}`} onClick={()=>startScan(branchCode)}>Scan</button>
                     <button className='btn w-[7.5vw]'>Stop</button>
                 </div>
             </div>

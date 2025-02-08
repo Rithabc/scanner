@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-let i=1;
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./tiff");
@@ -28,13 +28,11 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     
     let code = req.params.branchCode || "default"; // Ensure code is provided
-    let name = i.toString().padStart(5, "0"); // Format number to 5 digits
-    let finalFilename = `${code}_${name}.tif`;
+    let finalFilename = `${code}_${file.originalname}`;
     console.log(req.body);
     
     console.log("Saved as:", finalFilename);
     
-    i++; // Increment counter for next upload
     cb(null, finalFilename);
   },
 });
@@ -50,9 +48,10 @@ const upload = multer({
   },
 });
 
-app.post("/upload/:branchCode", upload.array("files"), (req, res) => {
-  const files = req.files.map((file) => file.filename);
-  res.json({ file: files });
+app.post("/upload/:branchCode", upload.single("file"), (req, res) => {
+  //console.log(req.files);
+  //const files = req.files.map((file) => file.filename);
+  res.json({ file: file });
 });
 
 app.post("/ocrData", async (req, res) => {
@@ -172,7 +171,7 @@ app.post("/register",async (req,res) => {
 // })
 
 app.use("/images", express.static(path.join(__dirname, "images")));
-app.use("/B&Wimages", express.static(path.join(__dirname, "B&Wimages")));
+app.use("/tiff", express.static(path.join(__dirname, "tiff")));
 
 app.listen(5000, () => {
   console.log("Server started on port 5000");
