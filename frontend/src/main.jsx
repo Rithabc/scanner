@@ -15,9 +15,14 @@ createRoot(document.getElementById("root")).render(
     <AuthProvider>
       <BrowserRouter>
         {/* <NavSidebar> */}
+            {/* <NavSidebar></NavSidebar> */}
           <Routes>
             <Route path="/login" element={<Login />} />
 
+
+            <Route path="/register" element={<Register />} />
+          
+          
             <Route
               path="/"
               element={
@@ -31,8 +36,6 @@ createRoot(document.getElementById("root")).render(
               
               
               } />
-
-            <Route path="/register" element={<Register />} />
           </Routes>
         {/* </NavSidebar> */}
       </BrowserRouter>

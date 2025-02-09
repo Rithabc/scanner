@@ -3,8 +3,8 @@ const cors = require("cors");
 const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
-const Tesseract = require("tesseract.js");
-const sharp = require("sharp");
+// const Tesseract = require("tesseract.js");
+// const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const JSON_SECRET = process.env.JSON_SECRET || "asjbdh";
@@ -15,7 +15,7 @@ const prisma = new PrismaClient();
 
 
 
-const tessdataPath = path.join(__dirname, "tessdata")
+// const tessdataPath = path.join(__dirname, "tessdata")
 
 const app = express();
 app.use(cors());
@@ -56,77 +56,77 @@ app.post("/upload/:branchCode", upload.single("file"), (req, res) => {
   res.json({ file: file });
 });
 
-app.post("/ocrData", async (req, res) => {
-  const images = req.body.filenames;
-  var result = [];
+// app.post("/ocrData", async (req, res) => {
+//   const images = req.body.filenames;
+//   var result = [];
   
 
-  for(let index=0;index<images.length;index++) {
+//   for(let index=0;index<images.length;index++) {
    
       
 
-      const imagePath = path.join(__dirname, "tiff", images[index].filename);
+//       const imagePath = path.join(__dirname, "tiff", images[index].filename);
      
-      try{
+//       try{
 
       
-      const { data: { text } } =await Tesseract.recognize(
-        imagePath, // Path to the image
-        "e13b", // Custom language traineddata file
-        {
-          // logger: (info) => console.log(info), // Log progress
-          langPath: tessdataPath, // Path to the tessdata folder
-        }
-      );
-      const value = text.split("\n").filter((line) => line.trim().length > 0);
-      const ocrData = value.pop();
-      // console.log(ocrData.length);
-      if(ocrData!=null && ocrData.length>5){
+//       const { data: { text } } =await Tesseract.recognize(
+//         imagePath, // Path to the image
+//         "e13b", // Custom language traineddata file
+//         {
+//           // logger: (info) => console.log(info), // Log progress
+//           langPath: tessdataPath, // Path to the tessdata folder
+//         }
+//       );
+//       const value = text.split("\n").filter((line) => line.trim().length > 0);
+//       const ocrData = value.pop();
+//       // console.log(ocrData.length);
+//       if(ocrData!=null && ocrData.length>5){
 
-        result.push(ocrData);
-      }
-    }catch(error){
-      console.error("Error:", error);
-    }
+//         result.push(ocrData);
+//       }
+//     }catch(error){
+//       console.error("Error:", error);
+//     }
 
     
-  };
-  res.json({ result: result.filter((data) => data!=null) });
-});
+//   };
+//   res.json({ result: result.filter((data) => data!=null) });
+// });
 
-app.post("/toJpg", (req, res) => {
-  const images = req.body.filenames;
+// app.post("/toJpg", (req, res) => {
+//   const images = req.body.filenames;
 
-  images.forEach((image) => {
-    try {
-      const input = path.join(__dirname, "tiff", image.filename);
-      const output = path.join(
-        __dirname,
-        "images",
-        image.filename.replace(".tif", ".jpg")
-      );
-      const output2 = path.join(
-        __dirname,
-        "B&Wimages",
-        image.filename.replace(".tif", ".jpg")
-      );
-      sharp(input)
-        .jpeg({ quality: 100 })
-        .toFile(output, (err, info) => {
-          // console.log(err, info);
-        });
-      sharp(input)
-        .greyscale()
-        .jpeg({ quality: 100 })
-        .toFile(output2, (err, info) => {
-          // console.log(err, info);
-        });
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  res.json({ message: "Success" });
-});
+//   images.forEach((image) => {
+//     try {
+//       const input = path.join(__dirname, "tiff", image.filename);
+//       const output = path.join(
+//         __dirname,
+//         "images",
+//         image.filename.replace(".tif", ".jpg")
+//       );
+//       const output2 = path.join(
+//         __dirname,
+//         "B&Wimages",
+//         image.filename.replace(".tif", ".jpg")
+//       );
+//       sharp(input)
+//         .jpeg({ quality: 100 })
+//         .toFile(output, (err, info) => {
+//           // console.log(err, info);
+//         });
+//       sharp(input)
+//         .greyscale()
+//         .jpeg({ quality: 100 })
+//         .toFile(output2, (err, info) => {
+//           // console.log(err, info);
+//         });
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   });
+//   res.json({ message: "Success" });
+// });
 
 app.post("/login",async (req,res) => {
   const {email,password} = req.body;
