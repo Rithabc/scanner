@@ -196,6 +196,6 @@ app.get("/images/:file", (req, res) => {
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/tiff", express.static(path.join(__dirname, "tiff")));
 
-app.listen(5000, () => {
+app.listen(5000,"0.0.0.0", () => {
   console.log("Server started on port 5000");
 });

@@ -27,7 +27,7 @@ export default function NavSidebar({ children }) {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  class="inline-block h-6 w-6 stroke-current"
+                  className="inline-block h-6 w-6 stroke-current"
                 >
                   <path
                     strokeLinecap="round"
@@ -46,7 +46,7 @@ export default function NavSidebar({ children }) {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -72,7 +72,7 @@ export default function NavSidebar({ children }) {
                   data-name="Layer 2"
                   id="a23c8b98-967c-4812-aeb3-60f34cc8eeab"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
+                  className="h-5 w-5"
                 >
                   <g id="SVGRepo_bgCarrier" strokeWidth={0} />
                   <g
@@ -97,7 +97,7 @@ export default function NavSidebar({ children }) {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -126,7 +126,7 @@ export default function NavSidebar({ children }) {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
+                    className="h-5 w-5"
                   >
                     <g id="SVGRepo_bgCarrier" strokeWidth={0} />
                     <g
@@ -151,14 +151,14 @@ export default function NavSidebar({ children }) {
               </li>
 
               <li>
-                <Link to={"/"}>Home</Link>
+                <Link to={"/"} className="btn border-0">Home</Link>
               </li>
               <li>
-                <Link to={"/scanner"}>Scanner</Link>
+                <Link to={"/scanner"} className="btn border-0">Scanner</Link>
               </li>
               <li>
                 <details>
-                  <summary>Parent</summary>
+                  <summary className="btn border-0">Parent</summary>
                   <ul>
                     <li>
                       <a>Submenu 1</a>
