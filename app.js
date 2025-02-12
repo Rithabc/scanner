@@ -53,7 +53,7 @@ const upload = multer({
 app.post("/upload/:branchCode", upload.single("file"), (req, res) => {
   //console.log(req.files);
   //const files = req.files.map((file) => file.filename);
-  res.json({ file: file });
+  res.json({ file: req.file });
 });
 
 // app.post("/ocrData", async (req, res) => {
