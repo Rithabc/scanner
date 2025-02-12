@@ -11,7 +11,7 @@ export default function AuthProvider({children}) {
 
     const login = async (email,password) => {
         try{
-            const response = await fetch("http://localhost:5000/login",{
+            const response = await fetch("http://34.47.233.91:5000/login",{
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
