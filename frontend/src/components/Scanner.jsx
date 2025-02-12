@@ -28,22 +28,8 @@ export default function Scanner() {
     setImage(imageFORMULAScanJS());
   }, []);
 
-  const [send, setSend] = useState(false);
+  
 
-  const handleFile = async (code) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", send);
-      const response = await fetch(`http://34.47.233.91:5000/upload/${code}`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const startScan = async (code) => {
     const settings = {
@@ -171,8 +157,7 @@ export default function Scanner() {
           </div>
         </div>
       </div>
-      <input type="file" onChange={(e) => setSend(e.target.files[0])}></input>
-      <button onClick={() => handleFile(branchCode)}>Send</button>
+ 
     </div>
   );
 }
