@@ -26,7 +26,7 @@ export function imageFORMULAScanJS() {
   };
 
   var DEFAULT = {
-    'FQDN': '34.47.233.91:6851',
+    'FQDN': 'localhost:6851',
     'MONITOR_TIMEOUT': 600 //second
   };
 
