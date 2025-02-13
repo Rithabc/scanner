@@ -28,7 +28,7 @@ function App() {
     schmseparator: 0,
     schmdatetime: -2,
     show_error_message: 1,
-    destination: "https://34.47.233.91/api:5000/upload/007",
+    destination: "https://34.47.233.91/api/upload/007",
     destinationheaders: {
       Method: "POST",
     },
@@ -177,7 +177,7 @@ function App() {
       setResponse(JSON.stringify(scanResponse, null, 2));
       setFileNames(scanResponse.value.files);
       const result = await fetch(
-        `https://34.47.233.91/api:5000/ocrData`,
+        `https://34.47.233.91/api/ocrData`,
         {
           method: "POST",
           headers: {
@@ -189,7 +189,7 @@ function App() {
       const data = await result.json();
       setText(data.result);
       const jpg = await fetch(
-        `https://34.47.233.91/api:5000/toJpg`
+        `https://34.47.233.91/api/toJpg`
       ,{
         method: 'POST',
         headers: {
@@ -305,7 +305,7 @@ function App() {
                 
                   <img
                     key={index+1}
-                    src={`https://34.47.233.91/api:5000/images/${file.filename.replace(
+                    src={`https://34.47.233.91/api/images/${file.filename.replace(
                       ".tif",
                       ".jpg"
                     )}`}
@@ -321,7 +321,7 @@ function App() {
               return (
                 <>
                  
-                  <img key={index} src={`https://34.47.233.91/api:5000/B&Wimages/${file.filename.replace(".tif",".jpg"
+                  <img key={index} src={`https://34.47.233.91/api/B&Wimages/${file.filename.replace(".tif",".jpg"
                     )}`}
                     className="w-[750px] h-[300px]"
                   ></img>

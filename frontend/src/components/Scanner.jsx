@@ -49,7 +49,7 @@ export default function Scanner() {
       schmseparator: 0,
       schmdatetime: -2,
       show_error_message: 1,
-      destination: `https://34.47.233.91/api:5000/upload/${code}`,
+      destination: `https://34.47.233.91/api/upload/${code}`,
       destinationheaders: {
         Method: "POST",
       },
@@ -84,7 +84,7 @@ export default function Scanner() {
           <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
             {fileNames?.map((cheque, index) => (
               <img
-                src={`https://34.47.233.91/api:5000/tiff/${branchCode}_${cheque.filename}`}
+                src={`https://34.47.233.91/api/tiff/${branchCode}_${cheque.filename}`}
                 alt="cheque"
                 className="w-[80%] h-[40%]"
                 key={index}

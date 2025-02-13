@@ -6,7 +6,7 @@ export default function Register() {
     const[password,setPassword] = useState('');
 
     const register = async () => {
-        const response = await fetch('https://34.47.233.91/api:5000/register',{
+        const response = await fetch('https://34.47.233.91/api/register',{
             method:"POST",
             headers: {
                 'Content-Type':'application/json'
