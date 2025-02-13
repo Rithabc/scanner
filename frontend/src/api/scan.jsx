@@ -26,7 +26,7 @@ export function imageFORMULAScanJS() {
   };
 
   var DEFAULT = {
-    'FQDN': 'localhost:6851',
+    'FQDN': 'localhost:6851', //scan server url 
     'MONITOR_TIMEOUT': 600 //second
   };
 
