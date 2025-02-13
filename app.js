@@ -50,7 +50,7 @@ const upload = multer({
   },
 });
 
-app.post("/upload/:branchCode", upload.single("file"), (req, res) => {
+app.post("/api/upload/:branchCode", upload.single("file"), (req, res) => {
   //console.log(req.files);
   //const files = req.files.map((file) => file.filename);
   res.json({ file: req.file });
@@ -128,7 +128,7 @@ app.post("/upload/:branchCode", upload.single("file"), (req, res) => {
 //   res.json({ message: "Success" });
 // });
 
-app.post("/login",async (req,res) => {
+app.post("/api/login",async (req,res) => {
   const {email,password} = req.body;
   // const hashedPassword = bcrypt.hashSync(password,10);
  
@@ -159,7 +159,7 @@ app.post("/login",async (req,res) => {
  
 })
 
-app.get("/tokenCheck",async (req,res) => {
+app.get("/api/tokenCheck",async (req,res) => {
   const token = req.headers.authorization.split(" ")[1];
 
   if(!token) return res.json({message:"No token found"});
@@ -172,7 +172,7 @@ app.get("/tokenCheck",async (req,res) => {
   }
 })
 
-app.post("/register",async (req,res) => {
+app.post("/api/register",async (req,res) => {
   const {email,password} = req.body;
   const hashedPassword = bcrypt.hashSync(password,10);
   
@@ -188,13 +188,13 @@ app.post("/register",async (req,res) => {
 });
 
 
-app.get("/images/:file", (req, res) => {
+app.get("/api/images/:file", (req, res) => {
   const image = path.join(__dirname, "images", req.params.file);
   res.sendFile(image);
 })
 
-app.use("/images", express.static(path.join(__dirname, "images")));
-app.use("/tiff", express.static(path.join(__dirname, "tiff")));
+app.use("/api/images", express.static(path.join(__dirname, "images")));
+app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));
 
 app.listen(5000,"0.0.0.0", () => {
   console.log("Server started on port 5000");
