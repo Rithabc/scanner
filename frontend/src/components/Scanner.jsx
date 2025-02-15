@@ -33,7 +33,7 @@ export default function Scanner() {
 
   const startScan = async (code) => {
     const settings = {
-      colormode: 4,
+      colormode: 3,
       scanside: 1,
       limit_number_of_sheets: 100,
       resolution: 200,

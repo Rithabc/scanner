@@ -188,10 +188,10 @@ app.post("/api/register",async (req,res) => {
 });
 
 
-app.get("/api/images/:file", (req, res) => {
-  const image = path.join(__dirname, "images", req.params.file);
-  res.sendFile(image);
-})
+// app.get("/api/images/:file", (req, res) => {
+//   const image = path.join(__dirname, "images", req.params.file);
+//   res.sendFile(image); 
+// })
 
 app.use("/api/images", express.static(path.join(__dirname, "images")));
 app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));

@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavSidebar from "./components/NavSidebar.jsx";
 import AuthProvider from "./auth/AuthProvider.jsx";
 import ProtectedRoutes from "./auth/ProtectedRoutes.jsx";
+import Test from "./components/Test.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -36,6 +37,7 @@ createRoot(document.getElementById("root")).render(
               
               
               } />
+              <Route path="/test" element={<ProtectedRoutes><Test></Test></ProtectedRoutes>}/>
           </Routes>
         {/* </NavSidebar> */}
       </BrowserRouter>
