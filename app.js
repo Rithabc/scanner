@@ -55,7 +55,7 @@ app.post("/api/upload/:branchCode", upload.single("file"), (req, res) => {
 
   sharp(req.file)
   .toFormat(".tiff")
-  .toFile("./tiffImage",)
+  .toFile("./tifImage",)
   .then((info) => {
     console.log(info);
   })
