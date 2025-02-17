@@ -84,7 +84,7 @@ export default function Scanner() {
           <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
             {fileNames?.map((cheque, index) => (
               <img
-                src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} //nice
+                src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename.split(".")[0]}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} //nice
                 alt="cheque"
                 className="w-[80%] h-[40%]"
                 key={index}
