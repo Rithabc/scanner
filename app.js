@@ -30,7 +30,8 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     
     let code = req.params.branchCode || "default"; // Ensure code is provided
-    let finalFilename = `${code}_${file.originalname}`;
+    let finalFilename = `${code}_${file.originalname}_${parseInt(file.originalname.split(".").pop() %2!=0) ? "Front" : "Back"}`;
+
     console.log(req.body);
     
     console.log("Saved as:", finalFilename);
