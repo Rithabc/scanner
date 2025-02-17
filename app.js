@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     
     let code = req.params.branchCode || "default"; // Ensure code is provided
-    let finalFilename = `${code}_${file.originalname.split(".")[0]}_${parseInt(file.originalname.split(".")[0] %2!=0) ? "Front" : "Back"}.jpg`;
+    let finalFilename = `${code}_${file.originalname.split(".")[0]}_${parseInt((file.originalname.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.jpg`;
     console.log(file.originalname.split(".")[0]);
     console.log(req.body);
     
