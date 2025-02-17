@@ -4,7 +4,7 @@ const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
 // const Tesseract = require("tesseract.js");
-// const sharp = require("sharp");
+const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const JSON_SECRET = process.env.JSON_SECRET || "asjbdh";
@@ -52,8 +52,16 @@ const upload = multer({
 });
 
 app.post("/api/upload/:branchCode", upload.single("file"), (req, res) => {
-  //console.log(req.files);
-  //const files = req.files.map((file) => file.filename);
+
+  sharp(req.file)
+  .toFormat(".tiff")
+  .toFile("./tiffImage",)
+  .then((info) => {
+    console.log(info);
+  })
+
+
+
   res.json({ file: req.file });
 });
 
