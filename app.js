@@ -51,9 +51,9 @@ const upload = multer({
   },
 });
 
-app.post("/api/upload/:branchCode", upload.single("file"), (req, res) => {
+app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  sharp(`${req.file.path}`)
+  await sharp(`${req.file.path}`)
   .toFormat("tiff")
   .toFile(`${req.file.filename.replace(".jpg",".tif")}`)
   .then((info) => {
