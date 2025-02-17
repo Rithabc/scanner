@@ -53,12 +53,14 @@ const upload = multer({
 
 app.post("/api/upload/:branchCode", upload.single("file"), (req, res) => {
 
-  sharp(req.file)
-  .toFormat(".tiff")
-  .toFile("./tifImage",)
-  .then((info) => {
-    console.log(info);
-  })
+  // sharp(req.file)
+  // .toFormat(".tiff")
+  // .toFile("./tifImage",)
+  // .then((info) => {
+  //   console.log(info);
+  // })
+
+  console.log(req.file);
 
 
 
