@@ -84,7 +84,7 @@ export default function Scanner() {
           <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
             {fileNames?.map((cheque, index) => (
               <img
-                src={`https://34.47.233.91/api/tiff/${branchCode}_${cheque.filename}`}
+                src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`}
                 alt="cheque"
                 className="w-[80%] h-[40%]"
                 key={index}
@@ -99,7 +99,7 @@ export default function Scanner() {
               className="bg-green-100 w-[100%] h-[10%] flex justify-between items-center p-2 gap-2"
             >
               <h1 className="text-1xl font-bold">
-                {branchCode}_{cheque.filename}
+                {branchCode}_{cheque.filename}_{parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}
               </h1>
             </div>
           ))}
