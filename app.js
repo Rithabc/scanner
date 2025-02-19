@@ -207,6 +207,7 @@ app.post("/api/register",async (req,res) => {
 app.use("/api/images", express.static(path.join(__dirname, "images")));
 app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));
 app.use("/api/imageFromScanner", express.static(path.join(__dirname, "imageFromScanner")));
+app.use("/api/tifImages", express.static(path.join(__dirname, "tifImages")));
 
 app.listen(5000,"0.0.0.0", () => {
   console.log("Server started on port 5000");
