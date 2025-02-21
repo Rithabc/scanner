@@ -63,7 +63,6 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
       {
         compression: 'ccittfax4',
         bitdepth:1,
-        resolution: 200,
       }
     )
     .toFile(outputImagePath)
