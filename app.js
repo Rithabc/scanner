@@ -65,7 +65,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
   })
   .toFile(outputImagePath)
   .then(() => {
-    const tempImagePath = path.join(__dirname, 'tiff','temp_output.tiff'); // Temporary file for ImageMagick output
+    const tempImagePath = path.join(__dirname, 'tiff',outputImagePath); // Temporary file for ImageMagick output
       const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 -compress Group4 ${tempImagePath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
