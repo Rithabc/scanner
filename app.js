@@ -54,7 +54,7 @@ const upload = multer({
   },
 });
 
-async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
+async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,fileName) {
   await sharp(inputImagePath)
   .grayscale()
   .threshold(128)
@@ -64,8 +64,8 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
     bitdepth:1
   })
   .toFile(outputImagePath)
-  .then(() => {
-    const tempImagePath = path.join(__dirname,"..", 'tiff',outputImagePath); // Temporary file for ImageMagick output
+  .then((info) => {
+    const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
       const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 -compress Group4 ${tempImagePath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -94,7 +94,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,req.file.filename.replace(".jpg",".tiff"));
   // await sharp(`${req.file.path}`)
   // .toFormat("tiff")
   // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
