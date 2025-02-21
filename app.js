@@ -75,7 +75,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
       });
-      exec(`mv ${tempImagePath} ${outputImagePath}`, (moveError, moveStdout, moveStderr) => {
+      exec(`mv ./${tempImagePath} ${outputImagePath}`, (moveError, moveStdout, moveStderr) => {
         if (moveError) {
           console.error(`Move error: ${moveError}`);
           return;
