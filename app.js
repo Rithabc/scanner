@@ -68,7 +68,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
     )
     .toFile(outputImagePath)
     .then((info) => {
-      const command = `magick ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
+      const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -85,7 +85,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
   // await sharp(`${req.file.path}`)
   // .toFormat("tiff")
   // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
