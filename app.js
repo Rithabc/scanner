@@ -54,6 +54,8 @@ const upload = multer({
   },
 });
 
+ 
+
 async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,fileName) {
   await sharp(inputImagePath)
   .grayscale()
@@ -64,10 +66,10 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
     bitdepth:1
   })
   .toFile(outputImagePath)
-  .then((info) => {
+  .then(async (info) => {
     const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
       const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 -compress Group4 ${tempImagePath}`;
-      exec(command, (error, stdout, stderr) => {
+      await exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           return;
@@ -75,7 +77,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
       });
-      exec(`mv ./${tempImagePath} ${outputImagePath}`, (moveError, moveStdout, moveStderr) => {
+      await exec(`mv ./${tempImagePath} ${outputImagePath}`, (moveError, moveStdout, moveStderr) => {
         if (moveError) {
           console.error(`Move error: ${moveError}`);
           return;
