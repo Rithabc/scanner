@@ -88,15 +88,27 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
 }
 
 
+
+
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
   await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,`./tiff/${req.file.filename.replace(".jpg",".tiff")}`);
-  // await sharp(`${req.file.path}`)
-  // .toFormat("tiff")
-  // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
-  // .then((info) => {
-  //   console.log(info);
-  // })
+  
+  await sharp(req.file.path)
+  .grayscale()
+  .toFile(`./images/${req.file.filename.replace(".jpg",".jpeg")}`)
+  .then((info) => {
+    const command = `convert ./images/${req.file.filename.replace(".jpg",".jpeg")} -units PixelsPerInch -density 100 -quality 50 ./jpeg/${req.file.filename.replace(".jpg",".jpeg")}`;
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+    });
+  })
+  
 
   console.log(req.file);
 
@@ -246,6 +258,7 @@ app.use("/api/images", express.static(path.join(__dirname, "images")));
 app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));
 app.use("/api/imageFromScanner", express.static(path.join(__dirname, "imageFromScanner")));
 app.use("/api/tifImages", express.static(path.join(__dirname, "tifImages")));
+app.use("/api/jpeg", express.static(path.join(__dirname, "jpeg")));
 
 
 
