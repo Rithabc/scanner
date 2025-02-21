@@ -87,7 +87,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.path.replace(".jpg",".tiff")}`)
   // await sharp(`${req.file.path}`)
   // .toFormat("tiff")
   // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
