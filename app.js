@@ -65,10 +65,10 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
     compression:"ccittfax4",
     bitdepth:1
   })
-  .toFile(outputImagePath)
+  .toFile(fileName)
   .then(async (info) => {
-    const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
-      const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 -compress Group4 ${tempImagePath}`;
+    // const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
+      const command = `convert ${fileName} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}`;
       await exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -77,13 +77,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
       });
-      await exec(`mv ./${tempImagePath} ${outputImagePath}`, (moveError, moveStdout, moveStderr) => {
-        if (moveError) {
-          console.error(`Move error: ${moveError}`);
-          return;
-        }
-        console.log(`Image processed and saved successfully at: ${outputImagePath}`);
-      });
+      
     })
     .catch((err) => {
       console.error(err);
@@ -96,7 +90,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,req.file.filename.replace(".jpg",".tiff"));
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,`./tiff/${req.file.filename.replace(".jpg",".tiff")}`);
   // await sharp(`${req.file.path}`)
   // .toFormat("tiff")
   // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
