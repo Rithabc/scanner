@@ -56,18 +56,17 @@ const upload = multer({
 
 async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
   await sharp(inputImagePath)
-    .grayscale()
-    .threshold(128)
-    .toColorspace('b-w')
-    .tiff(
-      {
-        compression: 'ccittfax4',
-        bitdepth:1,
-      }
-    )
-    .toFile(outputImagePath)
-    .then((info) => {
-      const command = `magick ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
+  .grayscale()
+  .threshold(128)
+  .toColorspace("b-w")
+  .tiff({
+    compression:"ccittfax4",
+    bitdepth:1
+  })
+  .toFile(outputImagePath)
+  .then(() => {
+  
+      const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -77,6 +76,10 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
         console.error(`stderr: ${stderr}`);
       });
     })
+    .catch((err) => {
+      console.error(err);
+    });
+    
 
 
 }
@@ -316,9 +319,9 @@ async function processImages() {
 
 
 
-const inputImagePath = path.join('./images', '000_170220251545298800003_Front.jpg');
-const outputImagePath = path.join('./images', '000_170220251545298800003_Front.tiff');
-convertImageToTIFFWithCCITT4(inputImagePath,outputImagePath);
+// const inputImagePath = path.join('./images', '000_170220251545298800003_Front.jpg');
+// const outputImagePath = path.join('./images', 'withSharp_000_170220251545298800003_Front.tiff');
+// convertImageToTIFFWithCCITT4(inputImagePath,outputImagePath);
 
 
 app.listen(5000,"0.0.0.0", () => {
