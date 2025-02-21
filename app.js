@@ -7,6 +7,9 @@ const path = require("path");
 const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
+// const imagemagick = require("imagemagick-native");
+const { exec  } = require("child_process");
+const gm = require("gm").subClass({imageMagick: false});
 const JSON_SECRET = process.env.JSON_SECRET || "asjbdh";
 
 const {PrismaClient} = require('@prisma/client');
@@ -51,14 +54,44 @@ const upload = multer({
   },
 });
 
+async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
+  await sharp(inputImagePath)
+    .grayscale()
+    .threshold(128)
+    .toColorspace('b-w')
+    .tiff(
+      {
+        compression: 'ccittfax4',
+        bitdepth:1,
+        resolution: 200,
+      }
+    )
+    .toFile(outputImagePath)
+    .then((info) => {
+      const command = `magick ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
+      });
+    })
+
+
+}
+
+
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
 
-  await sharp(`${req.file.path}`)
-  .toFormat("tiff")
-  .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tif")}`)
-  .then((info) => {
-    console.log(info);
-  })
+  convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
+  // await sharp(`${req.file.path}`)
+  // .toFormat("tiff")
+  // .toFile(`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`)
+  // .then((info) => {
+  //   console.log(info);
+  // })
 
   console.log(req.file);
 
@@ -208,6 +241,86 @@ app.use("/api/images", express.static(path.join(__dirname, "images")));
 app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));
 app.use("/api/imageFromScanner", express.static(path.join(__dirname, "imageFromScanner")));
 app.use("/api/tifImages", express.static(path.join(__dirname, "tifImages")));
+
+
+
+
+
+const sFilePath = ".\\images\\"; // Set file path
+
+async function convertImageCTS(imageBuffer, fileType, textOverlay = "") {
+    try {
+        let image = sharp(imageBuffer);
+
+        // Get metadata for width/height
+        let metadata = await image.metadata();
+
+        if (fileType === "TIFF") {
+            let tiffImage = image.withMetadata({ density: 200 });
+
+            if (textOverlay) {
+                tiffImage = tiffImage.composite([{
+                    input: Buffer.from(
+                        `<svg width="${metadata.width}" height="${metadata.height}">
+                            <text x="50%" y="50%" font-size="22" fill="black" text-anchor="middle">${textOverlay}</text>
+                         </svg>`
+                    ),
+                    top: metadata.height / 4,
+                    left: metadata.width / 4
+                }]);
+            }
+
+            return await tiffImage
+                .resize(metadata.width, metadata.height)
+                .tiff({ compression: "lzw" })
+                .toBuffer();
+        }
+
+        if (fileType === "JPEG") {
+            return await image
+                .resize({ width: Math.floor(metadata.width / 2), height: Math.floor(metadata.height / 2) })
+                .jpeg({ quality: 80 })
+                .toBuffer();
+        }
+
+        throw new Error("Unsupported file type");
+    } catch (error) {
+        console.error("Error processing image:", error);
+        return null;
+    }
+}
+
+async function processImages() {
+    try {
+        // Read input images as buffers
+        const bImgeBF = fs.readFileSync(path.join(sFilePath, "000_170220251545298800003_Front.jpg"));
+        const bImgeBR = fs.readFileSync(path.join(sFilePath, "000_170220251545298800003_Front.jpg"));
+
+        // Convert images
+        const vCTSImageGF = await convertImageCTS(bImgeBF, "JPEG");
+        const vCTSImageBF = await convertImageCTS(bImgeBF, "TIFF");
+        const vCTSImageBR = await convertImageCTS(bImgeBR, "TIFF");
+
+        // Write output images
+        if (vCTSImageGF) fs.writeFileSync(path.join(sFilePath, "CTS_FrontImage.JPEG"), vCTSImageGF);
+        if (vCTSImageBF) fs.writeFileSync(path.join(sFilePath, "CTS_FrontImage.TIFF"), vCTSImageBF);
+        if (vCTSImageBR) fs.writeFileSync(path.join(sFilePath, "CTS_BackImage.TIFF"), vCTSImageBR);
+
+        console.log("Image processing completed.");
+    } catch (error) {
+        console.error("Error processing files:", error);
+    }
+}
+
+// Run the function
+// processImages();
+
+
+
+const inputImagePath = path.join('./images', '000_170220251545298800003_Front.jpg');
+const outputImagePath = path.join('./images', '000_170220251545298800003_Front.tiff');
+convertImageToTIFFWithCCITT4(inputImagePath,outputImagePath);
+
 
 app.listen(5000,"0.0.0.0", () => {
   console.log("Server started on port 5000");
