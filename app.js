@@ -98,7 +98,7 @@ app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
   .grayscale()
   .toFile(`./images/${req.file.filename.replace(".jpg",".jpeg")}`)
   .then((info) => {
-    const command = `convert ./images/${req.file.filename.replace(".jpg",".jpeg")} -units PixelsPerInch -density 100 -quality 50 ./jpeg/${req.file.filename.replace(".jpg",".jpeg")}`;
+    const command = `convert ./images/${req.file.filename.replace(".jpg",".jpeg")} -depth 24 -units PixelsPerInch -density 100 -quality 50 ./jpeg/${req.file.filename.replace(".jpg",".jpeg")}`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
