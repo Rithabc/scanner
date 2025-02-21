@@ -68,7 +68,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath) {
     )
     .toFile(outputImagePath)
     .then((info) => {
-      const command = `convert ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
+      const command = `magick ${outputImagePath} -units PixelsPerInch -density 200 ${outputImagePath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
