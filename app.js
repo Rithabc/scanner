@@ -68,7 +68,7 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
   .toFile(fileName)
   .then(async (info) => {
     // const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
-      const command = `magick ${fileName} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}
+      const command = `convert ${fileName} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}
       `; 
       await exec(command,async (error, stdout, stderr) => {
         if (error) {
@@ -97,7 +97,7 @@ async function jpgToJpeg(inputImagePath, outputImagePath) {
   .jpeg({quality:80})
   .toFile(outputImagePath)
   .then((info) => {
-    const command = `magick ${outputImagePath} -units PixelsPerInch -density 100 -type TrueColor ${outputImagePath}`;
+    const command = `convert ${outputImagePath} -units PixelsPerInch -density 100 -type TrueColor ${outputImagePath}`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
