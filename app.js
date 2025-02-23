@@ -334,9 +334,9 @@ app.post("/api/download", async (req, res) => {
 
     // Generate ZIP in memory
     const zipData = await zip.generateAsync({ type: "nodebuffer" });
-    // fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
+    fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
     // Set headers for download
-    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
+    res.setHeader("Content-Disposition", 'attachment; filename="files.zip"');
     res.setHeader("Content-Type", "application/zip");
 
     res.send(zipData); // Send ZIP file to the client
