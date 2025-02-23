@@ -301,6 +301,8 @@ app.post("/api/register",async (req,res) => {
 //   }
 // });
 
+
+
 app.post("/api/download", async (req, res) => {
   try {
     const zip = new JSZip();
@@ -320,6 +322,7 @@ app.post("/api/download", async (req, res) => {
         if (fs.existsSync(filePath)) {
           const image = fs.readFileSync(filePath);
           zip.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
+          // fs.writeFileSync(path.join(__dirname, "jpeg", `${fileNameWithoutExt}_${frontOrBack}.jpeg`), image);
         } else {
           console.warn(`File not found: ${filePath}`);
         }
@@ -330,7 +333,7 @@ app.post("/api/download", async (req, res) => {
 
     // Generate ZIP in memory
     const zipData = await zip.generateAsync({ type: "nodebuffer" });
-
+    fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
     // Set headers for download
     res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
     res.setHeader("Content-Type", "application/zip");
