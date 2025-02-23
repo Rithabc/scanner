@@ -281,11 +281,16 @@ app.post("/api/download", async (req, res) => {
     const zip = new JSzip();
     const {filename,branchCode} = req.body;
 
-    filename?.map(async (file) => {
-      console.log(file);
-      const image =await  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
-      await zip.file(file, image);
-    })
+    // filename?.map(async (file) => {
+    //   console.log(file);
+    //   const image =await  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
+    //   await zip.file(file, image);
+    // })
+
+    for(const file of filename){
+      const image =  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
+       zip.file(file.filename, image);
+    }
     const zipData = await zip.generateAsync({type:"nodebuffer"});
     res.set({
       "Content-Disposition": "attachment; filename=download.zip",
