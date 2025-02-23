@@ -122,8 +122,8 @@ async function run(input,output,filename) {
   await convertImageToTIFFWithCCITT4(input,output,`./tiff/${filename}`);
   }
 }
-run("./images/005_210220251742491770001_Front.jpg","./tifImages/005_210220251742491770001_Front.tiff","005_210220251742491770001_Front.jpg");
-run("./images/005_210220251742494360002_Back.jpg","./tifImages/005_210220251742494360002_Back.tiff","005_210220251742494360002_Back.jpg");
+run("./imageFromScanner/005_210220251742491770001_Front.jpg","./tifImages/005_210220251742491770001_Front.tiff","005_210220251742491770001_Front.jpg");
+run("./imageFromScanner/005_210220251742494360002_Back.jpg","./tifImages/005_210220251742494360002_Back.tiff","005_210220251742494360002_Back.jpg");
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
   if(req.file.path.includes("Front")){
