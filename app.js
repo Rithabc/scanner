@@ -7,6 +7,7 @@ const path = require("path");
 const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
+const JSzip = require("jszip");
 // const imagemagick = require("imagemagick-native");
 const { exec  } = require("child_process");
 const gm = require("gm").subClass({imageMagick: false});
@@ -273,6 +274,26 @@ app.post("/api/register",async (req,res) => {
 
   
   res.json({message: "Success"});
+});
+
+app.post("/api/download", async (req, res) => {
+  try{
+    const zip = new JSzip();
+    const {filename,branchCode} = req.body;
+    filename?.map(async (file) => {
+      const image = fs.readFileSync(path.join(__dirname, "tifImages", file.split(".")[0] + ".tiff"));
+      zip.file(file, image);
+    })
+    const zipData = await zip.generateAsync({type:"nodebuffer"});
+    res.set({
+      "Content-Disposition": "attachment; filename=download.zip",
+      "Content-Type": "application/zip",
+  });
+
+  res.send(zipData);
+  }catch(error){
+    console.error(error);
+  }
 });
 
 app.use("/api/images", express.static(path.join(__dirname, "images")));
