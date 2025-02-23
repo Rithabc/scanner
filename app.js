@@ -331,14 +331,22 @@ app.post("/api/download", async (req, res) => {
       }
     }
 
-    // Generate ZIP in memory
-    const zipData = await zip.generateAsync({ type: "nodebuffer" });
-    fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
-    // Set headers for download
-    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
-    res.setHeader("Content-Type", "application/zip");
+    const tempZipFile = path.join(os.tmpdir(), 'download.zip');
 
-    res.send(zipData); // Send ZIP file to the client
+    // Generate the ZIP file and write it to the temporary file
+    const zipData = await zip.generateAsync({ type: "nodebuffer" });
+    fs.writeFileSync(tempZipFile, zipData);
+
+    // Use res.download() to trigger the download
+    res.download(tempZipFile, 'download.zip', (err) => {
+      if (err) {
+        console.error("Error sending ZIP:", err);
+        res.status(500).send("Error downloading the ZIP file.");
+      } else {
+        // Optionally, delete the temporary file after download
+        fs.unlinkSync(tempZipFile);
+      }
+    }); // Send ZIP file to the client
   } catch (error) {
     console.error("ZIP Creation Error:", error);
     res.status(500).send("Error creating ZIP file.");
