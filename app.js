@@ -276,30 +276,69 @@ app.post("/api/register",async (req,res) => {
   res.json({message: "Success"});
 });
 
+// app.post("/api/download", async (req, res) => {
+//   try{
+//     const zip = new JSzip();
+//     const {filename,branchCode} = req.body;
+
+//     // filename?.map(async (file) => {
+//     //   console.log(file);
+//     //   const image =await  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
+//     //   await zip.file(file, image);
+//     // })
+
+//     for(const file of filename){
+//       const image =  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
+//        zip.file(file.filename, image);
+//     }
+//     const zipData = await zip.generateAsync({type:"nodebuffer"});
+//     res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
+//     res.setHeader("Content-Type", "application/zip");
+
+//   res.send(zipData);
+//   }catch(error){
+//     console.error(error);
+//   }
+// });
+
 app.post("/api/download", async (req, res) => {
-  try{
-    const zip = new JSzip();
-    const {filename,branchCode} = req.body;
+  try {
+    const zip = new JSZip();
+    const { filename, branchCode } = req.body;
 
-    // filename?.map(async (file) => {
-    //   console.log(file);
-    //   const image =await  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
-    //   await zip.file(file, image);
-    // })
-
-    for(const file of filename){
-      const image =  fs.readFileSync(path.join(__dirname, "tifImages", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.tiff`));
-       zip.file(file.filename, image);
+    if (!filename || !branchCode) {
+      return res.status(400).send("Missing filename or branchCode");
     }
-    const zipData = await zip.generateAsync({type:"nodebuffer"});
-    res.set({
-      "Content-Disposition": "attachment; filename=download.zip",
-      "Content-Type": "application/zip",
-  });
 
-  res.send(zipData);
-  }catch(error){
-    console.error(error);
+    // Read and add files to ZIP
+    for (const file of filename) {
+      try {
+        const fileNameWithoutExt = file.filename.split(".")[0];
+        const frontOrBack = parseInt(fileNameWithoutExt.substring(15)) % 2 !== 0 ? "Front" : "Back";
+        const filePath = path.join(__dirname, "tifImages", `${branchCode}_${fileNameWithoutExt}_${frontOrBack}.tiff`);
+
+        if (fs.existsSync(filePath)) {
+          const image = fs.readFileSync(filePath);
+          zip.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
+        } else {
+          console.warn(`File not found: ${filePath}`);
+        }
+      } catch (fileError) {
+        console.error(`Error reading file: ${file.filename}`, fileError);
+      }
+    }
+
+    // Generate ZIP in memory
+    const zipData = await zip.generateAsync({ type: "nodebuffer" });
+
+    // Set headers for download
+    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
+    res.setHeader("Content-Type", "application/zip");
+
+    res.send(zipData); // Send ZIP file to the client
+  } catch (error) {
+    console.error("ZIP Creation Error:", error);
+    res.status(500).send("Error creating ZIP file.");
   }
 });
 
