@@ -279,7 +279,7 @@ app.post("/api/register",async (req,res) => {
 
 app.post("/api/download", async (req, res) => {
   try{
-    const zip = new JSzip();
+    const zip = new JSZip();
     const {filename,branchCode} = req.body;
 
     const folder = zip.folder("images");
