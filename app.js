@@ -280,7 +280,9 @@ app.post("/api/download", async (req, res) => {
   try{
     const zip = new JSzip();
     const {filename,branchCode} = req.body;
+
     filename?.map(async (file) => {
+      console.log(file);
       const image = fs.readFileSync(path.join(__dirname, "tifImages", `${file.split(".")[0]}.tiff"`));
       zip.file(file, image);
     })
