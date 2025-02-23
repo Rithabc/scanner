@@ -68,14 +68,16 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
   .toFile(fileName)
   .then(async (info) => {
     // const tempImagePath = path.join("./", 'tiff',fileName); // Temporary file for ImageMagick output
-      const command = `convert ${fileName} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}`;
-      await exec(command, (error, stdout, stderr) => {
+      const command = `magick ${fileName} -units PixelsPerInch -density 200 -compress Group4 ${outputImagePath}
+      `; 
+      await exec(command,async (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           return;
         }
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
+        await fs.unlinkSync(`${fileName}`); // Delete temporary file
       });
       
     })
@@ -87,18 +89,15 @@ async function convertImageToTIFFWithCCITT4(inputImagePath, outputImagePath,file
 
 }
 
-
-
-
-app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
-
-  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,`./tiff/${req.file.filename.replace(".jpg",".tiff")}`);
-  
-  await sharp(req.file.path)
+async function jpgToJpeg(inputImagePath, outputImagePath) {
+  const metadata = await sharp(inputImagePath).metadata();
+  await sharp(inputImagePath)
   .grayscale()
-  .toFile(`./images/${req.file.filename.replace(".jpg",".jpeg")}`)
+  .resize(Math.floor(metadata.width / 2), Math.floor(metadata.height / 2))
+  .jpeg({quality:80})
+  .toFile(outputImagePath)
   .then((info) => {
-    const command = `convert ./images/${req.file.filename.replace(".jpg",".jpeg")} -depth 24 -units PixelsPerInch -density 100 -quality 50 ./jpeg/${req.file.filename.replace(".jpg",".jpeg")}`;
+    const command = `magick ${outputImagePath} -units PixelsPerInch -density 100 -type TrueColor ${outputImagePath}`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -107,8 +106,36 @@ app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
       console.log(`stdout: ${stdout}`);
       console.error(`stderr: ${stderr}`);
     });
+
   })
+  .catch((err) => {
+    console.error(err);
+  });
+}
+
+async function run(input,output,filename) {
+  if(input.includes("Front")){
+  await convertImageToTIFFWithCCITT4(input,output,`./tiff/${filename}`);
+  await jpgToJpeg(input,`./jpeg/${filename}`);
+  }
+  else{
+  await convertImageToTIFFWithCCITT4(input,output,`./tiff/${filename}`);
+  }
+}
+run("./images/005_210220251742491770001_Front.jpg","./tifImages/005_210220251742491770001_Front.tiff","005_210220251742491770001_Front.jpg");
+run("./images/005_210220251742494360002_Back.jpg","./tifImages/005_210220251742494360002_Back.tiff","005_210220251742494360002_Back.jpg");
+
+app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
+  if(req.file.path.includes("Front")){
+
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,`./tiff/${req.file.filename.replace(".jpg",".tiff")}`);
   
+  await jpgToJpeg(req.file.path,`./jpeg/${req.file.filename.replace(".jpg",".jpeg")}`);
+  }
+  else{
+  await convertImageToTIFFWithCCITT4(req.file.path,`./tifImages/${req.file.filename.replace(".jpg",".tiff")}`,`./tiff/${req.file.filename.replace(".jpg",".tiff")}`);
+
+  }
 
   console.log(req.file);
 
@@ -248,12 +275,6 @@ app.post("/api/register",async (req,res) => {
   res.json({message: "Success"});
 });
 
-
-// app.get("/api/images/:file", (req, res) => {
-//   const image = path.join(__dirname, "images", req.params.file);
-//   res.sendFile(image); 
-// })
-
 app.use("/api/images", express.static(path.join(__dirname, "images")));
 app.use("/api/tiff", express.static(path.join(__dirname, "tiff")));
 app.use("/api/imageFromScanner", express.static(path.join(__dirname, "imageFromScanner")));
@@ -310,19 +331,18 @@ async function convertImageCTS(imageBuffer, fileType, textOverlay = "") {
 
 async function processImages() {
     try {
-        // Read input images as buffers
+      
         const bImgeBF = fs.readFileSync(path.join(sFilePath, "000_170220251545298800003_Front.jpg"));
         const bImgeBR = fs.readFileSync(path.join(sFilePath, "000_170220251545298800003_Front.jpg"));
 
-        // Convert images
+     
         const vCTSImageGF = await convertImageCTS(bImgeBF, "JPEG");
-        const vCTSImageBF = await convertImageCTS(bImgeBF, "TIFF");
-        const vCTSImageBR = await convertImageCTS(bImgeBR, "TIFF");
 
+// 
         // Write output images
         if (vCTSImageGF) fs.writeFileSync(path.join(sFilePath, "CTS_FrontImage.JPEG"), vCTSImageGF);
-        if (vCTSImageBF) fs.writeFileSync(path.join(sFilePath, "CTS_FrontImage.TIFF"), vCTSImageBF);
-        if (vCTSImageBR) fs.writeFileSync(path.join(sFilePath, "CTS_BackImage.TIFF"), vCTSImageBR);
+        // if (vCTSImageBF) fs.writeFileSync(path.join(sFilePath, "CTS_FrontImage.TIFF"), vCTSImageBF);
+        // if (vCTSImageBR) fs.writeFileSync(path.join(sFilePath, "CTS_BackImage.TIFF"), vCTSImageBR);
 
         console.log("Image processing completed.");
     } catch (error) {
@@ -332,7 +352,6 @@ async function processImages() {
 
 // Run the function
 // processImages();
-
 
 
 // const inputImagePath = path.join('./images', '000_170220251545298800003_Front.jpg');
