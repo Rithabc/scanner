@@ -311,6 +311,7 @@ app.post("/api/download", async (req, res) => {
     if (!filename || !branchCode) {
       return res.status(400).send("Missing filename or branchCode");
     }
+    const folder = zip.folder('files');
 
     // Read and add files to ZIP
     for (const file of filename) {
@@ -321,7 +322,7 @@ app.post("/api/download", async (req, res) => {
 
         if (fs.existsSync(filePath)) {
           const image = fs.readFileSync(filePath);
-          zip.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
+          folder.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
           // fs.writeFileSync(path.join(__dirname, "jpeg", `${fileNameWithoutExt}_${frontOrBack}.jpeg`), image);
         } else {
           console.warn(`File not found: ${filePath}`);
@@ -331,22 +332,14 @@ app.post("/api/download", async (req, res) => {
       }
     }
 
-    const tempZipFile = path.join(os.tmpdir(), 'download.zip');
-
-    // Generate the ZIP file and write it to the temporary file
+    // Generate ZIP in memory
     const zipData = await zip.generateAsync({ type: "nodebuffer" });
-    fs.writeFileSync(tempZipFile, zipData);
+    // fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
+    // Set headers for download
+    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
+    res.setHeader("Content-Type", "application/zip");
 
-    // Use res.download() to trigger the download
-    res.download(tempZipFile, 'download.zip', (err) => {
-      if (err) {
-        console.error("Error sending ZIP:", err);
-        res.status(500).send("Error downloading the ZIP file.");
-      } else {
-        // Optionally, delete the temporary file after download
-        fs.unlinkSync(tempZipFile);
-      }
-    }); // Send ZIP file to the client
+    res.send(zipData); // Send ZIP file to the client
   } catch (error) {
     console.error("ZIP Creation Error:", error);
     res.status(500).send("Error creating ZIP file.");
