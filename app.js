@@ -4,6 +4,7 @@ const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
 // const Tesseract = require("tesseract.js");
+const archiver = require("archiver");
 const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
@@ -303,45 +304,90 @@ app.post("/api/register",async (req,res) => {
 
 
 
+// app.post("/api/download", async (req, res) => {
+//   try {
+//     const zip = new JSZip();
+//     const { filename, branchCode } = req.body;
+
+//     if (!filename || !branchCode) {
+//       return res.status(400).send("Missing filename or branchCode");
+//     }
+//     const folder = zip.folder('files');
+
+//     // Read and add files to ZIP
+//     for (const file of filename) {
+//       try {
+//         const fileNameWithoutExt = file.filename.split(".")[0];
+//         const frontOrBack = parseInt(fileNameWithoutExt.substring(15)) % 2 !== 0 ? "Front" : "Back";
+//         const filePath = path.join(__dirname, "tifImages", `${branchCode}_${fileNameWithoutExt}_${frontOrBack}.tiff`);
+
+//         if (fs.existsSync(filePath)) {
+//           const image = fs.readFileSync(filePath);
+//           folder.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
+//           // fs.writeFileSync(path.join(__dirname, "jpeg", `${fileNameWithoutExt}_${frontOrBack}.jpeg`), image);
+//         } else {
+//           console.warn(`File not found: ${filePath}`);
+//         }
+//       } catch (fileError) {
+//         console.error(`Error reading file: ${file.filename}`, fileError);
+//       }
+//     }
+
+//     // Generate ZIP in memory
+//     const zipData = await zip.generateAsync({ type: "nodebuffer" });
+//     fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
+//     // Set headers for download
+//     res.setHeader("Content-Disposition", 'attachment; filename="files.zip"');
+//     res.setHeader("Content-Type", "application/zip");
+
+//     res.send(zipData); // Send ZIP file to the client
+//   } catch (error) {
+//     console.error("ZIP Creation Error:", error);
+//     res.status(500).send("Error creating ZIP file.");
+//   }
+// });
+
 app.post("/api/download", async (req, res) => {
   try {
-    const zip = new JSZip();
     const { filename, branchCode } = req.body;
 
     if (!filename || !branchCode) {
       return res.status(400).send("Missing filename or branchCode");
     }
-    const folder = zip.folder('files');
 
-    // Read and add files to ZIP
-    for (const file of filename) {
-      try {
-        const fileNameWithoutExt = file.filename.split(".")[0];
-        const frontOrBack = parseInt(fileNameWithoutExt.substring(15)) % 2 !== 0 ? "Front" : "Back";
-        const filePath = path.join(__dirname, "tifImages", `${branchCode}_${fileNameWithoutExt}_${frontOrBack}.tiff`);
-
-        if (fs.existsSync(filePath)) {
-          const image = fs.readFileSync(filePath);
-          folder.file(`${fileNameWithoutExt}_${frontOrBack}.tiff`, image); // Save with correct filename in ZIP
-          // fs.writeFileSync(path.join(__dirname, "jpeg", `${fileNameWithoutExt}_${frontOrBack}.jpeg`), image);
-        } else {
-          console.warn(`File not found: ${filePath}`);
-        }
-      } catch (fileError) {
-        console.error(`Error reading file: ${file.filename}`, fileError);
-      }
-    }
-
-    // Generate ZIP in memory
-    const zipData = await zip.generateAsync({ type: "nodebuffer" });
-    fs.writeFileSync(path.join(__dirname,"tiff", "download.zip"), zipData);
-    // Set headers for download
+    // Set headers for the response to indicate a file download
     res.setHeader("Content-Disposition", 'attachment; filename="files.zip"');
     res.setHeader("Content-Type", "application/zip");
 
-    res.send(zipData); // Send ZIP file to the client
+    // Create a ZIP file stream
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // Best compression
+    });
+
+    // Pipe the ZIP data to the response
+    archive.pipe(res);
+
+    // Loop through the files and add them to the ZIP archive
+    for (const file of filename) {
+      const fileNameWithoutExt = file.filename.split(".")[0];
+      const frontOrBack = parseInt(fileNameWithoutExt.substring(15)) % 2 !== 0 ? "Front" : "Back";
+      const filePath = path.join(__dirname, "tifImages", `${branchCode}_${fileNameWithoutExt}_${frontOrBack}.tiff`);
+
+      if (fs.existsSync(filePath)) {
+        // Append each file to the ZIP archive
+        archive.append(fs.createReadStream(filePath), { name: `${fileNameWithoutExt}_${frontOrBack}.tiff` });
+        console.log(`Added to ZIP: ${filePath}`);
+      } else {
+        console.warn(`File not found: ${filePath}`);
+      }
+    }
+
+    // Finalize the ZIP file and send it
+    archive.finalize();
+
+    console.log("ZIP file with folder sent successfully!");
   } catch (error) {
-    console.error("ZIP Creation Error:", error);
+    console.error("Error creating ZIP file:", error);
     res.status(500).send("Error creating ZIP file.");
   }
 });
