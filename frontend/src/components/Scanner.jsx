@@ -13,12 +13,12 @@ function codeIsValid(code) {
   }
   return true;
 }
-// const back={
-//   filename : "210220251742494360002.jpg",
-// }
-// const front ={
-//   filename : "210220251742491770001.jpg",
-// }
+const front ={
+  filename : "210220251742491770001.jpg",
+}
+const back={
+  filename : "210220251742494360002.jpg",
+}
 export default function Scanner() {
   const [chequeCount, setChequeCount] = useState(0);
   // const cheques = ["001_00001","001_00002","001_00003","001_00004","001_00005","001_00006","001_00007","001_00008","001_00009","001_00010","001_00011","001_00012","001_00013","001_00014","001_00015","001_00016","001_00017","001_00018","001_00019","001_00020","001_00021","001_00022","001_00023","001_00024","001_00025","001_00026","001_00027","001_00028","001_00029","001_00030","001_00031","001_00032","001_00033","001_00034","001_00035","001_00036","001_00037","001_00038","001_00039","001_00040","001_00041","001_00042","001_00043","001_00044","001_00045","001_00046","001_00047","001_00048","001_00049","001_00050","001_00051","001_00052","001_00053","001_00054","001_00055","001_00056","001_00057","001_00058","001_00059","001_00060","001_00061","001_00062","001_00063","001_00064","001_00065","001_00066","001_00067","001_00068","001_00069","001_00070","001_00071","001_00072","001_00073","001_00074","001_00075","001_00076","001_00077","001_00078","001_00079","001_00080","001_00081","001_00082","001_00083","001_00084","001_00085","001_00086","001_00087","001_00088","001_00089","001_00090","001_00091","001_00092","001_00093","001_00094","001_00095","001_00096","001_00097","001_00098","001_00099","001_00100","001_00101"]
@@ -27,6 +27,7 @@ export default function Scanner() {
   const [cheques, setCheques] = useState([]);
   const [response, setResponse] = useState("");
   const [fileNames, setFileNames] = useState([]);
+  const [testFile, setTestFile] = useState([front,back]);
 
   const [image, setImage] = useState(null);
   useEffect(() => {
@@ -60,6 +61,32 @@ export default function Scanner() {
     }
   };
   
+  const downloadTest = async () => {
+    try {
+      const response = await fetch("https://34.47.233.91/api/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branchCode: branchCode,
+          filename: testFile 
+        }),
+      });
+      if(response.ok){
+        console.log("Downloaded");
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${branchCode}_cheque.zip`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
   
 
 
@@ -195,8 +222,8 @@ export default function Scanner() {
               </div>
                   </div>
               <div className="flex flex-col gap-2">
-                <button className="btn">Download</button>
-                <button className="btn" onClick={download}>Test Download</button>
+                <button className="btn" onClick={download}>Download</button>
+                <button className="btn" onClick={downloadTest}>Test Download</button>
 
               </div>
             </div>
