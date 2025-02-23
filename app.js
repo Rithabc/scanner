@@ -292,7 +292,7 @@ app.post("/api/download", async (req, res) => {
 
     for(const file of filename){
       if((file.filename.split(".")[0].substring(15)) %2!=0){
-        const jpeg =  fs.readFileSync(path.join(__dirname, "jpeg", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.jpg`));
+        const jpeg =  fs.readFileSync(path.join(__dirname, "jpeg", `${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.jpeg`));
         folder.file(`${branchCode}_${file.filename.split(".")[0]}_${parseInt((file.filename.split(".")[0].substring(15))) %2!=0 ? "Front" : "Back"}.jpeg`, jpeg);
         
       }
