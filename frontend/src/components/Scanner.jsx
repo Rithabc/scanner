@@ -34,17 +34,24 @@ export default function Scanner() {
   }, []);
 
   const download = async () => {
-    const response = await fetch("https://34.47.233.91/api/download",{
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        branchCode: branchCode,
-        filename: fileNames,
-      }),
-    });
-  }
+    try {
+      const response = await fetch("https://34.47.233.91/api/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branchCode: branchCode,
+          filename: fileNames,
+        }),
+      });
+  
+      
+    } catch (error) {
+      console.error("Error downloading the ZIP file:", error);
+    }
+  };
+  
 
 
   
