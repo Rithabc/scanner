@@ -223,7 +223,9 @@ export default function Scanner() {
                   </div>
               <div className="flex flex-col gap-2">
                 <button className="btn" onClick={download}>Download</button>
-                <button className="btn" onClick={downloadTest}>Test Download</button>
+                <button className="btn" onClick={downloadTest}>Test Download</button> 
+                {/* only for testing */}
+
 
               </div>
             </div>
