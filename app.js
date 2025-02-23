@@ -301,9 +301,9 @@ app.post("/api/download", async (req, res) => {
     }
     const zipData = await zip.generateAsync({type:"nodebuffer"});
 
-    fs.writeFileSync(path.join("tiff","download.zip"),zipData);
+    fs.writeFileSync(path.join("zipfiles",`${branchCode}.zip`),zipData);
 
-    res.download(path.join("tiff","download.zip"), "download.zip", (err) => {
+    res.download(path.join("zipfiles",`${branchCode}.zip`), `${branchCode}.zip`, (err) => {
       if (err) {
         console.error(err);
       }
