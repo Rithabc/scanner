@@ -13,13 +13,17 @@ function codeIsValid(code) {
   }
   return true;
 }
-const front ={
-  filename : "210220251742491770001.jpg",
+const front = {
+  filename: "210220251742491770001.jpg",
 }
-const back={
-  filename : "210220251742494360002.jpg",
+const back = {
+  filename: "210220251742494360002.jpg",
 }
 export default function Scanner() {
+  const [scannerList, setScannerList] = useState([]);
+  const [selectedScanner, setSelectedScanner] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [showScannerSelection, setShowScannerSelection] = useState(false);
   const [chequeCount, setChequeCount] = useState(0);
   // const cheques = ["001_00001","001_00002","001_00003","001_00004","001_00005","001_00006","001_00007","001_00008","001_00009","001_00010","001_00011","001_00012","001_00013","001_00014","001_00015","001_00016","001_00017","001_00018","001_00019","001_00020","001_00021","001_00022","001_00023","001_00024","001_00025","001_00026","001_00027","001_00028","001_00029","001_00030","001_00031","001_00032","001_00033","001_00034","001_00035","001_00036","001_00037","001_00038","001_00039","001_00040","001_00041","001_00042","001_00043","001_00044","001_00045","001_00046","001_00047","001_00048","001_00049","001_00050","001_00051","001_00052","001_00053","001_00054","001_00055","001_00056","001_00057","001_00058","001_00059","001_00060","001_00061","001_00062","001_00063","001_00064","001_00065","001_00066","001_00067","001_00068","001_00069","001_00070","001_00071","001_00072","001_00073","001_00074","001_00075","001_00076","001_00077","001_00078","001_00079","001_00080","001_00081","001_00082","001_00083","001_00084","001_00085","001_00086","001_00087","001_00088","001_00089","001_00090","001_00091","001_00092","001_00093","001_00094","001_00095","001_00096","001_00097","001_00098","001_00099","001_00100","001_00101"]
   const [branchCode, setBranchCode] = useState("");
@@ -27,35 +31,74 @@ export default function Scanner() {
   const [cheques, setCheques] = useState([]);
   const [response, setResponse] = useState("");
   const [fileNames, setFileNames] = useState([]);
-  const [testFile, setTestFile] = useState([front,back]);
-  const[scanComplete, setScanComplete] = useState(false);
-
+  const [testFile, setTestFile] = useState([front, back]);
+  const [scanComplete, setScanComplete] = useState(false);
   const [image, setImage] = useState(null);
+
   useEffect(() => {
-    setImage(imageFORMULAScanJS());
+    
+    // setImage();
+    fetchScanner();
   }, []);
 
-  useEffect(() => {
-    if (scanComplete) {
-      setTimeout(() => {
-        setScanComplete(false);
-      }, 3000);
+  const fetchScanner = async () => {
+    try {
+      const fetchImage = imageFORMULAScanJS();
+      setImage(fetchImage);
+      const FQDN = await fetchImage.DEFAULT.FQDN;
+      const scannerResponse = await fetchImage.getScannerList(FQDN);
+      console.log("running");
+      const availableScanners = scannerResponse.value.scanners;
+      console.log(availableScanners.length);
+      if (!availableScanners.length) {
+        alert("No scanners found. Please check your connection.");
+        return;
+      }
+
+      setScannerList(availableScanners);
+
+      if (availableScanners.length === 1) {
+        // Auto-select the scanner if only one exists
+        setSelectedScanner(availableScanners[0]);
+      }
+    } catch (error) {
+      setScannerList(["scanner1"]);
+      console.error("Error fetching scanners:", error);
     }
-  }, [scanComplete]);
+  };
+
+  const handleConnect = async () => {
+    if (!selectedScanner) {
+      alert("Please select a scanner first!");
+      return;
+    }
+
+    try {
+      const FQDN = image.DEFAULT.FQDN;
+      await connectScanner(FQDN, selectedScanner);
+      setIsConnected(true);
+      alert(`Scanner ${selectedScanner} connected successfully!`);
+    } catch (error) {
+      console.error("Error connecting to scanner:", error);
+      alert("Failed to connect to scanner. Please try again.");
+    }
+  };
+
+
 
   const download = async () => {
     try {
-      const response = await fetch("https://34.47.233.91/api/download", {
+      const response = await fetch("http://localhost:5000/api/download", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           branchCode: branchCode,
-          filename: fileNames 
+          filename: fileNames
         }),
       });
-      if(response.ok){
+      if (response.ok) {
         console.log("Downloaded");
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -69,20 +112,20 @@ export default function Scanner() {
       console.error("Error:", error);
     }
   };
-  
+
   const downloadTest = async () => {
     try {
-      const response = await fetch("https://34.47.233.91/api/download", {
+      const response = await fetch("http://localhost:5000/api/download", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           branchCode: branchCode,
-          filename: testFile 
+          filename: testFile
         }),
       });
-      if(response.ok){
+      if (response.ok) {
         console.log("Downloaded");
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -95,14 +138,14 @@ export default function Scanner() {
     } catch (error) {
       console.error("Error:", error);
     }
-  }
-  
-
-
-  
-
+  };
 
   const startScan = async (code) => {
+    if (!selectedScanner) {
+      alert("Please select a scanner");
+      return;
+    }
+
     const settings = {
       colormode: 3,
       scanside: 1,
@@ -120,7 +163,8 @@ export default function Scanner() {
       schmseparator: 0,
       schmdatetime: -2,
       show_error_message: 1,
-      destination: `https://34.47.233.91/api/upload/${code}`,
+      scanner: `${selectedScanner}`, //selectedScanner
+      destination: `http://localhost:5000/api/upload/${code}`,
       destinationheaders: {
         Method: "POST",
       },
@@ -134,6 +178,7 @@ export default function Scanner() {
       pdf_ocr: 1,
       pdf_ocr_language: "eng",
     };
+
     try {
       const FQDN = image.DEFAULT.FQDN;
       const scanResponse = await image.scanSetParameter(settings, FQDN);
@@ -143,7 +188,11 @@ export default function Scanner() {
       setFileNames(scanResponse.value.files);
       setChequeCount(scanResponse.value.files.length);
       console.log(fileNames);
-      scanComplete(true);
+      setScanComplete(true);
+
+      setTimeout(() => {
+        setScanComplete(false);
+      }, 3000);
     } catch (error) {
       setResponse(JSON.stringify(error, null, 2));
       console.error(error);
@@ -151,20 +200,23 @@ export default function Scanner() {
   };
 
   return (
-    <div className=" w-[50%] flex flex-col items-center">
-        {scanComplete && (
-          <div className="w-[50%] bg-green-500 text-white text-center py-2 font-bold rounded-lg mt-4">
-            ✅ Scanning Completed Successfully!
-          </div>
-        )}
-      
+    <div className=" w-full flex flex-col items-center">
+      {scanComplete && (
+        <div className="absolute pl-2 pr-2 bg-white opacity-70 text-green-500 text-center py-2 font-bold rounded-lg mt-4">
+          ✅ Scanning Completed Successfully!
+        </div>
+      )}
+
       <div className="bg-blue-100 w-full h-screen flex justify-center items-center">
         <div className="w-[80%] h-[60%] bg-gray-300 flex justify-center items-center rounded-lg gap-2 pt-2 px-2">
+          {/*Scanner selection */}
+
+
           <div className="bg-red-200 h-[90%] w-[60%]">
             <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
               {fileNames?.map((cheque, index) => (
                 <img
-                  src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename.split(".")[0]}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} // _${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`
+                  src={`http://localhost:5000/api/imageFromScanner/${branchCode}_${cheque.filename.split(".")[0]}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} // _${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`
                   alt="cheque"
                   className="w-[80%] h-[40%]"
                   key={index}
@@ -179,7 +231,7 @@ export default function Scanner() {
                 className="bg-green-100 w-[100%] h-[10%] flex justify-between items-center p-2 gap-2"
               >
                 <h1 className="text-1xl font-bold">
-                  {branchCode}_{cheque.filename} 
+                  {branchCode}_{cheque.filename}
                   {/* //_{parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"} */}
                 </h1>
               </div>
@@ -187,23 +239,50 @@ export default function Scanner() {
           </div>
           <div className=" h-[90%] w-[25%] flex flex-col justify-center items-center gap-2">
             <div className="bg-green-100 w-[100%] h-[50%] flex flex-col gap-2 justify-center items-center rounded-sm">
-              <input
+              {!isConnected &&
+              <div className="w-full flex justify-center items-center">
+                <div className="dropdown dropdown-bottom w-full flex justify-center ">
+                <div tabIndex={0} role="button" className="btn w-[90%]">{selectedScanner? selectedScanner : "Select a scanner"}</div>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 z-1 w-[90%] p-2 shadow-sm  ">
+                  <li><a onClick={() => setSelectedScanner("scanner")}>Item 1</a></li>
+                  <li><a>Item 1</a></li>
+                  <li><a>Item 1</a></li>
+                  <li><a>Item 1</a></li>
+
+                  {scannerList.map((scanner, index) => (
+                    <li>
+                        <a onClick={() => setSelectedScanner(scanner)}>{scanner}</a>
+                      </li>
+
+))}
+                </ul>
+              </div>
+            </div>
+              
+                
+                
+              }
+              {isConnected && <input
                 type="text"
+                placeholder="Branch Code"
+                className="w-[90%] focus:none input"
                 onChange={(e) => {
                   setBranchCode(e.target.value);
                 }}
-                placeholder="Branch Code"
-                className="w-[90%] focus:none input"
-              />
+              />}
               <div className="flex gap-2 justify-center items-center w-[100%]">
-                <button className="btn w-[42%] ">Connect</button>
-                <button className="btn w-[42%] ">End Batch</button>
+                <button className={`btn w-[42%]  ${selectedScanner ? "" : "btn-disabled"} ${!isConnected ? "" : "btn-disabled"}`}
+                  onClick={handleConnect}
+
+                >
+                  {isConnected ? "Connected" : "Connect"}
+                </button>
+                <button className="btn w-[42%]" >End Batch</button>
               </div>
               <div className="flex gap-2 justify-center items-center w-[100%]">
                 <button
-                  className={`btn w-[42%]  ${
-                    codeIsValid(branchCode) ? "" : "btn-disabled"
-                  }`}
+                  className={`btn w-[42%]  ${codeIsValid(branchCode) && isConnected ? "" : "btn-disabled"
+                    }`}
                   onClick={() => startScan(branchCode)}
                 >
                   Scan
@@ -214,33 +293,33 @@ export default function Scanner() {
             <div className="bg-green-100 w-[100%] h-[50%] flex flex-col justify-between p-1 rounded-sm">
               <div className="flex gap-2 justify-between p-2 items-center">
                 <h1 className="text-1xl font-bold">Cheque Count</h1>
-                <h1 className="text-1xl font-bold">{chequeCount}</h1>
+                <h1 className="text-1xl font-bold">{chequeCount / 2}</h1>
               </div>
               <div className="flex flex-row gap-2 p-2  justify-between
               items-center">
                 <div className="flex flex-col gap-2">
 
-                <div className="flex gap-2">
-                  <input
-                    type="radio"
-                    name="radio-3"
-                    className="radio radio-neutral"
-                    defaultChecked
+                  <div className="flex gap-2">
+                    <input
+                      type="radio"
+                      name="radio-3"
+                      className="radio radio-neutral"
+                      defaultChecked
                     />
-                  <label className="text-1xl font-semibold">Front image</label>
+                    <label className="text-1xl font-semibold">Front image</label>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="radio"
+                      name="radio-3"
+                      className="radio radio-neutral"
+                    />
+                    <label className="text-1xl font-semibold">Back image</label>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <input
-                    type="radio"
-                    name="radio-3"
-                    className="radio radio-neutral"
-                  />
-                  <label className="text-1xl font-semibold">Back image</label>
-                </div>
-                    </div>
                 <div className="flex flex-col gap-2">
                   <button className="btn" onClick={download}>Download</button>
-                  <button className="btn" onClick={downloadTest}>Test Download</button> 
+                  <button className="btn" onClick={downloadTest}>Test Download</button>
                   {/* only for testing */}
 
 
@@ -248,7 +327,7 @@ export default function Scanner() {
               </div>
             </div>
           </div>
-        </div> 
+        </div>
       </div>
     </div>
   );

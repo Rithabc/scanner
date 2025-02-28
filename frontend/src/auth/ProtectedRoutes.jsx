@@ -14,7 +14,7 @@ export default function ProtectedRoutes({children}) {
     useEffect(() => {
         const fetchData = async ()=>{
             try{
-                const response =  await fetch("https://34.47.233.91/api/tokenCheck",{
+                const response =  await fetch("http://localhost:5000/api/tokenCheck",{
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

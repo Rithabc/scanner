@@ -4,7 +4,7 @@ const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
 // const Tesseract = require("tesseract.js");
-const archiver = require("archiver");
+//const archiver = require("archiver");
 const sharp = require("sharp");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
@@ -124,8 +124,8 @@ async function run(input,output,filename) {
   await convertImageToTIFFWithCCITT4(input,output,`./tiff/${filename}`);
   }
 }
-run("./imageFromScanner/005_210220251742491770001_Front.jpg","./tifImages/005_210220251742491770001_Front.tiff","005_210220251742491770001_Front.jpg");
-run("./imageFromScanner/005_210220251742494360002_Back.jpg","./tifImages/005_210220251742494360002_Back.tiff","005_210220251742494360002_Back.jpg");
+//run("./imageFromScanner/005_210220251742491770001_Front.jpg","./tifImages/005_210220251742491770001_Front.tiff","005_210220251742491770001_Front.jpg");
+//run("./imageFromScanner/005_210220251742494360002_Back.jpg","./tifImages/005_210220251742494360002_Back.tiff","005_210220251742494360002_Back.jpg");
 
 app.post("/api/upload/:branchCode", upload.single("file"),async (req, res) => {
   if(req.file.path.includes("Front")){
