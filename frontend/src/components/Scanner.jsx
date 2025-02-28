@@ -28,11 +28,20 @@ export default function Scanner() {
   const [response, setResponse] = useState("");
   const [fileNames, setFileNames] = useState([]);
   const [testFile, setTestFile] = useState([front,back]);
+  const[scanComplete, setScanComplete] = useState(false);
 
   const [image, setImage] = useState(null);
   useEffect(() => {
     setImage(imageFORMULAScanJS());
   }, []);
+
+  useEffect(() => {
+    if (scanComplete) {
+      setTimeout(() => {
+        setScanComplete(false);
+      }, 3000);
+    }
+  }, [scanComplete]);
 
   const download = async () => {
     try {
@@ -134,6 +143,7 @@ export default function Scanner() {
       setFileNames(scanResponse.value.files);
       setChequeCount(scanResponse.value.files.length);
       console.log(fileNames);
+      scanComplete(true);
     } catch (error) {
       setResponse(JSON.stringify(error, null, 2));
       console.error(error);
@@ -141,98 +151,105 @@ export default function Scanner() {
   };
 
   return (
-    <div className="bg-blue-100 w-full h-screen flex justify-center items-center">
-      <div className="w-[80%] h-[60%] bg-gray-300 flex justify-center items-center rounded-lg gap-2 pt-2 px-2">
-        <div className="bg-red-200 h-[90%] w-[60%]">
-          <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
+    <div className=" w-[50%] flex flex-col items-center">
+        {scanComplete && (
+          <div className="w-[50%] bg-green-500 text-white text-center py-2 font-bold rounded-lg mt-4">
+            ✅ Scanning Completed Successfully!
+          </div>
+        )}
+      
+      <div className="bg-blue-100 w-full h-screen flex justify-center items-center">
+        <div className="w-[80%] h-[60%] bg-gray-300 flex justify-center items-center rounded-lg gap-2 pt-2 px-2">
+          <div className="bg-red-200 h-[90%] w-[60%]">
+            <div className="w-[100%] h-[100%] flex justify-center flex-col items-center gap-2 overflow-y-scroll">
+              {fileNames?.map((cheque, index) => (
+                <img
+                  src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename.split(".")[0]}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} // _${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`
+                  alt="cheque"
+                  className="w-[80%] h-[40%]"
+                  key={index}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="bg-red-200 h-[90%] w-[25%] overflow-y-scroll  ">
             {fileNames?.map((cheque, index) => (
-              <img
-                src={`https://34.47.233.91/api/imageFromScanner/${branchCode}_${cheque.filename.split(".")[0]}_${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`} // _${parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"}.jpg`
-                alt="cheque"
-                className="w-[80%] h-[40%]"
+              <div
                 key={index}
-              />
+                className="bg-green-100 w-[100%] h-[10%] flex justify-between items-center p-2 gap-2"
+              >
+                <h1 className="text-1xl font-bold">
+                  {branchCode}_{cheque.filename} 
+                  {/* //_{parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"} */}
+                </h1>
+              </div>
             ))}
           </div>
-        </div>
-        <div className="bg-red-200 h-[90%] w-[25%] overflow-y-scroll  ">
-          {fileNames?.map((cheque, index) => (
-            <div
-              key={index}
-              className="bg-green-100 w-[100%] h-[10%] flex justify-between items-center p-2 gap-2"
-            >
-              <h1 className="text-1xl font-bold">
-                {branchCode}_{cheque.filename} 
-                {/* //_{parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"} */}
-              </h1>
+          <div className=" h-[90%] w-[25%] flex flex-col justify-center items-center gap-2">
+            <div className="bg-green-100 w-[100%] h-[50%] flex flex-col gap-2 justify-center items-center rounded-sm">
+              <input
+                type="text"
+                onChange={(e) => {
+                  setBranchCode(e.target.value);
+                }}
+                placeholder="Branch Code"
+                className="w-[90%] focus:none input"
+              />
+              <div className="flex gap-2 justify-center items-center w-[100%]">
+                <button className="btn w-[42%] ">Connect</button>
+                <button className="btn w-[42%] ">End Batch</button>
+              </div>
+              <div className="flex gap-2 justify-center items-center w-[100%]">
+                <button
+                  className={`btn w-[42%]  ${
+                    codeIsValid(branchCode) ? "" : "btn-disabled"
+                  }`}
+                  onClick={() => startScan(branchCode)}
+                >
+                  Scan
+                </button>
+                <button className="btn w-[42%] ">Stop</button>
+              </div>
             </div>
-          ))}
-        </div>
-        <div className=" h-[90%] w-[25%] flex flex-col justify-center items-center gap-2">
-          <div className="bg-green-100 w-[100%] h-[50%] flex flex-col gap-2 justify-center items-center rounded-sm">
-            <input
-              type="text"
-              onChange={(e) => {
-                setBranchCode(e.target.value);
-              }}
-              placeholder="Branch Code"
-              className="w-[90%] focus:none input"
-            />
-            <div className="flex gap-2 justify-center items-center w-[100%]">
-              <button className="btn w-[42%] ">Connect</button>
-              <button className="btn w-[42%] ">End Batch</button>
-            </div>
-            <div className="flex gap-2 justify-center items-center w-[100%]">
-              <button
-                className={`btn w-[42%]  ${
-                  codeIsValid(branchCode) ? "" : "btn-disabled"
-                }`}
-                onClick={() => startScan(branchCode)}
-              >
-                Scan
-              </button>
-              <button className="btn w-[42%] ">Stop</button>
-            </div>
-          </div>
-          <div className="bg-green-100 w-[100%] h-[50%] flex flex-col justify-between p-1 rounded-sm">
-            <div className="flex gap-2 justify-between p-2 items-center">
-              <h1 className="text-1xl font-bold">Cheque Count</h1>
-              <h1 className="text-1xl font-bold">{chequeCount}</h1>
-            </div>
-            <div className="flex flex-row gap-2 p-2  justify-between
-            items-center">
-              <div className="flex flex-col gap-2">
+            <div className="bg-green-100 w-[100%] h-[50%] flex flex-col justify-between p-1 rounded-sm">
+              <div className="flex gap-2 justify-between p-2 items-center">
+                <h1 className="text-1xl font-bold">Cheque Count</h1>
+                <h1 className="text-1xl font-bold">{chequeCount}</h1>
+              </div>
+              <div className="flex flex-row gap-2 p-2  justify-between
+              items-center">
+                <div className="flex flex-col gap-2">
 
-              <div className="flex gap-2">
-                <input
-                  type="radio"
-                  name="radio-3"
-                  className="radio radio-neutral"
-                  defaultChecked
+                <div className="flex gap-2">
+                  <input
+                    type="radio"
+                    name="radio-3"
+                    className="radio radio-neutral"
+                    defaultChecked
+                    />
+                  <label className="text-1xl font-semibold">Front image</label>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="radio"
+                    name="radio-3"
+                    className="radio radio-neutral"
                   />
-                <label className="text-1xl font-semibold">Front image</label>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="radio"
-                  name="radio-3"
-                  className="radio radio-neutral"
-                />
-                <label className="text-1xl font-semibold">Back image</label>
-              </div>
-                  </div>
-              <div className="flex flex-col gap-2">
-                <button className="btn" onClick={download}>Download</button>
-                <button className="btn" onClick={downloadTest}>Test Download</button> 
-                {/* only for testing */}
+                  <label className="text-1xl font-semibold">Back image</label>
+                </div>
+                    </div>
+                <div className="flex flex-col gap-2">
+                  <button className="btn" onClick={download}>Download</button>
+                  <button className="btn" onClick={downloadTest}>Test Download</button> 
+                  {/* only for testing */}
 
 
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </div> 
       </div>
- 
     </div>
   );
 }
