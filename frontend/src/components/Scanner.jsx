@@ -34,9 +34,10 @@ export default function Scanner() {
   const [testFile, setTestFile] = useState([front, back]);
   const [scanComplete, setScanComplete] = useState(false);
   const [image, setImage] = useState(null);
+  const [viewImage, setViewImage] = useState(0);
 
   useEffect(() => {
-    
+
     // setImage();
     fetchScanner();
   }, []);
@@ -221,7 +222,15 @@ export default function Scanner() {
                   className="w-[80%] h-[40%]"
                   key={index}
                 />
-              ))}
+              )).filter((cheque, index) => {
+                if (viewImage == 1) {
+                  return index % 2 == 0;
+                } else if (viewImage == 2) {
+                  return index % 2 != 0;
+                } else {
+                  return true;
+                }
+              })}
             </div>
           </div>
           <div className="bg-red-200 h-[90%] w-[25%] overflow-y-scroll  ">
@@ -235,32 +244,48 @@ export default function Scanner() {
                   {/* //_{parseInt(cheque.filename.substring(15)) % 2 != 0 ? "Front" : "Back"} */}
                 </h1>
               </div>
-            ))}
+            )).filter((cheque, index) => { 
+              if (viewImage == 1) {
+                return index % 2 == 0;
+              } else if (viewImage == 2) {
+                return index % 2 != 0;
+              } else {
+                return true;
+            }})}
           </div>
           <div className=" h-[90%] w-[25%] flex flex-col justify-center items-center gap-2">
             <div className="bg-green-100 w-[100%] h-[50%] flex flex-col gap-2 justify-center items-center rounded-sm">
               {!isConnected &&
-              <div className="w-full flex justify-center items-center">
-                <div className="dropdown dropdown-bottom w-full flex justify-center ">
-                <div tabIndex={0} role="button" className="btn w-[90%]">{selectedScanner? selectedScanner : "Select a scanner"}</div>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 z-1 w-[90%] p-2 shadow-sm  ">
-                  <li><a onClick={() => setSelectedScanner("scanner")}>Item 1</a></li>
-                  <li><a>Item 1</a></li>
-                  <li><a>Item 1</a></li>
-                  <li><a>Item 1</a></li>
+                //               <div className="w-full flex justify-center items-center">
+                //                 <div className="dropdown dropdown-bottom w-full flex justify-center ">
+                //                 <div tabIndex={0} role="button" className="btn w-[90%]">{selectedScanner? selectedScanner : "Select a scanner"}</div>
+                //                 <ul tabIndex={0} className="dropdown-content menu bg-base-100 z-1 w-[90%] p-2 shadow-sm  ">
 
+
+
+                //                   {scannerList.map((scanner, index) => (
+                //                     <li>
+                // <a onClick={() => setSelectedScanner(scanner)}>{scanner}</a>
+                //                       </li>
+
+                // ))}
+                //                 </ul>
+                //               </div>
+                //             </div>
+                <select defaultValue="Select Scanner" className="select w-[90%]" onChange={(e) => setSelectedScanner(e.target.value)}>
+                  <option disabled={true}>Select Scanner</option>
                   {scannerList.map((scanner, index) => (
-                    <li>
-                        <a onClick={() => setSelectedScanner(scanner)}>{scanner}</a>
-                      </li>
+                    <option key={scanner} value={scanner}>
+                      {scanner}
+                    </option>
 
-))}
-                </ul>
-              </div>
-            </div>
-              
-                
-                
+
+
+                  ))}
+                </select>
+
+
+
               }
               {isConnected && <input
                 type="text"
@@ -295,31 +320,23 @@ export default function Scanner() {
                 <h1 className="text-1xl font-bold">Cheque Count</h1>
                 <h1 className="text-1xl font-bold">{chequeCount / 2}</h1>
               </div>
-              <div className="flex flex-row gap-2 p-2  justify-between
-              items-center">
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4 p-2
+              ">
+                <div className="flex flex-row justify-start gap-2">
 
-                  <div className="flex gap-2">
-                    <input
-                      type="radio"
-                      name="radio-3"
-                      className="radio radio-neutral"
-                      defaultChecked
-                    />
-                    <label className="text-1xl font-semibold">Front image</label>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="radio"
-                      name="radio-3"
-                      className="radio radio-neutral"
-                    />
-                    <label className="text-1xl font-semibold">Back image</label>
-                  </div>
+                  <select defaultValue={0} className="select" onChange={(e) => setViewImage(e.target.value)}>
+                    <option disabled={true}>Both</option>
+                    <option value={0}>Both</option>
+                    <option value={1}>Front</option>
+                    <option value={2}>Back</option>
+                  </select>
+                  {/* {viewImage} */}
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 justify-end items-stretch">
                   <button className="btn" onClick={download}>Download</button>
-                  <button className="btn" onClick={downloadTest}>Test Download</button>
+                  {/* <button className="btn" onClick={() => setIsConnected(!isConnected)}>{isConnected?"connected":"not connected"}</button> */}
+                  {/* <button className="btn" onClick={downloadTest}>Test Download</button> */}
+                  {/* <button className="btn" onClick={()=> setFileNames([{filename:"123_210220251742491770001.jpg"},{filename:"123_210220251742494360002.jpg"}])}>add filenames</button> */}
                   {/* only for testing */}
 
 
